@@ -39,13 +39,16 @@ struct QuoteListView: View {
                         NavigationLink(destination: MainFeedView(startID: quote.id, isFromLibrary: true)) {
                             QuoteGridItem(quote: quote, color: backgroundColors[quote.colorIndex])
                         }
+                        // On macOS, NavigationLinks in grids can sometimes look like clickable buttons with a background.
+                        // This modifier keeps it looking clean and plain.
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding()
             }
         }
         .navigationTitle("My Quotes")
-        .navigationBarTitleDisplayMode(.inline)
+        // REMOVED: .navigationBarTitleDisplayMode(.inline)
         .background(Color.black.ignoresSafeArea())
     }
 }
