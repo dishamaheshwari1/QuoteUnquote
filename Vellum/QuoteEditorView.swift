@@ -141,16 +141,22 @@ struct QuoteEditorView: View {
                         .transition(.scale.combined(with: .opacity))
                     }
                     
-                    // NEW: Calendar Button
-                    // NEW: Calendar Button
-                    Button(action: { showDatePicker.toggle() }) {
+                    // NEW: Calendar Button with fixes
+                    Button(action: {
+                        showDatePicker.toggle()
+                        // Explicitly drop focus to help strip the blue ring
+                        isFocused = false
+                    }) {
                         Image(systemName: "calendar")
                     }
                     .buttonStyle(.plain)
                     .focusable(false)
-                    .focusEffectDisabled() // THE FIX: Forcefully kills the popover focus ring
+                    // THE FIXES: Kill focus effect and set dynamic text color
+                    .focusEffectDisabled()
+                    .foregroundColor(textColor)
                     .popover(isPresented: $showDatePicker, arrowEdge: .top) {
-                        DatePicker("Select Date", selection: $tempDate, displayedComponents: .date)
+                        // REMOVED: Redundant "Select Date" caption
+                        DatePicker("", selection: $tempDate, displayedComponents: .date)
                             .datePickerStyle(.graphical)
                             .padding()
                             .onChange(of: tempDate) { _, newDate in
