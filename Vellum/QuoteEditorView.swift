@@ -177,7 +177,7 @@ struct QuoteEditorView: View {
                         .buttonStyle(.plain)
                         .focusable(false)
                     } else {
-                        NavigationLink(destination: QuoteListView()) {
+                        NavigationLink(destination: GalleryView()) {
                             Image(systemName: "square.grid.2x2")
                         }
                         .buttonStyle(.plain)
