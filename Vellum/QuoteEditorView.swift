@@ -20,6 +20,10 @@ struct QuoteEditorView: View {
     @State private var tempNote: String = ""
     @State private var tempColorIndex: Int = 0
     
+    // NEW: State for the Calendar Popover
+    @State private var tempDate: Date = Date()
+    @State private var showDatePicker: Bool = false
+    
     @FocusState private var isFocused: Bool
     @State private var showSaveFeedback: Bool = false
     
@@ -44,7 +48,6 @@ struct QuoteEditorView: View {
     
     var body: some View {
         ZStack {
-            // 1. BACKGROUND
             ZStack {
                 backgroundColors[activeColorIndex]
                 Color.white.opacity(0.04).blendMode(.screen)
@@ -53,7 +56,6 @@ struct QuoteEditorView: View {
             .animation(.easeInOut(duration: 0.4), value: activeColorIndex)
             .onTapGesture { isFocused = false }
             
-            // 2. PERFECTLY CENTERED TEXT
             VStack(spacing: 25) {
                 TextField("", text: Binding(
                     get: { currentText },
@@ -67,15 +69,13 @@ struct QuoteEditorView: View {
                 .foregroundColor(textColor)
                 .tint(textColor)
                 .focused($isFocused)
-                // MAIN QUOTE INPUT FIX
                 .onKeyPress { keyPress in
-                    // We explicitly check that the key is Return AND no modifiers (like Shift) are pressed
                     if keyPress.key == .return && keyPress.modifiers.isEmpty {
                         isFocused = false
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { saveAction() }
                         return .handled
                     }
-                    return .ignored // Let Shift+Enter pass through!
+                    return .ignored
                 }
                 
                 if isNewEntryMode || !currentNote.isEmpty {
@@ -92,28 +92,24 @@ struct QuoteEditorView: View {
                     .foregroundColor(textColor.opacity(0.6))
                     .tint(textColor)
                     .focused($isFocused)
-                    // MAIN QUOTE INPUT FIX
                     .onKeyPress { keyPress in
-                        // We explicitly check that the key is Return AND no modifiers (like Shift) are pressed
                         if keyPress.key == .return && keyPress.modifiers.isEmpty {
                             isFocused = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { saveAction() }
                             return .handled
                         }
-                        return .ignored // Let Shift+Enter pass through!
+                        return .ignored
                     }
                 }
             }
             .frame(maxWidth: 650)
             .padding(.horizontal, 40)
             
-            // 3. KEYBOARD SHORTCUTS
             Group {
                 Button("") { changeColor(direction: -1) }.keyboardShortcut(.leftArrow, modifiers: .command)
                 Button("") { changeColor(direction: 1) }.keyboardShortcut(.rightArrow, modifiers: .command)
             }.opacity(0)
             
-            // 4. FEEDBACK
             if showSaveFeedback {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 70))
@@ -126,8 +122,13 @@ struct QuoteEditorView: View {
         }
         .focusable()
         .focusEffectDisabled()
+        .onAppear {
+            // Load the existing date if we are viewing an old quote
+            if let existingDate = quote?.dateCreated {
+                tempDate = existingDate
+            }
+        }
         
-        // 5. MINIMALIST TOOLBAR
         .overlay(alignment: .bottom) {
             HStack {
                 HStack(spacing: 22) {
@@ -138,6 +139,23 @@ struct QuoteEditorView: View {
                         .buttonStyle(.plain)
                         .focusable(false)
                         .transition(.scale.combined(with: .opacity))
+                    }
+                    
+                    // NEW: Calendar Button
+                    // NEW: Calendar Button
+                    Button(action: { showDatePicker.toggle() }) {
+                        Image(systemName: "calendar")
+                    }
+                    .buttonStyle(.plain)
+                    .focusable(false)
+                    .focusEffectDisabled() // THE FIX: Forcefully kills the popover focus ring
+                    .popover(isPresented: $showDatePicker, arrowEdge: .top) {
+                        DatePicker("Select Date", selection: $tempDate, displayedComponents: .date)
+                            .datePickerStyle(.graphical)
+                            .padding()
+                            .onChange(of: tempDate) { _, newDate in
+                                if !isNewEntryMode { quote?.dateCreated = newDate }
+                            }
                     }
                     
                     Button(action: deleteAction) {
@@ -186,8 +204,6 @@ struct QuoteEditorView: View {
         }
     }
     
-    // ... (Keep your existing deleteAction, changeColor, and saveAction exactly as they were)
-    
     func deleteAction() {
         withAnimation {
             if isNewEntryMode {
@@ -217,10 +233,16 @@ struct QuoteEditorView: View {
     func saveAction() {
         if isNewEntryMode {
             guard !tempText.isEmpty else { return }
+            // Pass the newly selected tempDate when creating a new quote
             let newQuote = Quote(text: tempText, note: tempNote, colorIndex: tempColorIndex)
+            newQuote.dateCreated = tempDate
             modelContext.insert(newQuote)
+            
             withAnimation { showSaveFeedback = true }
             tempText = ""; tempNote = ""; isFocused = false
+            // Reset the date for the next entry
+            tempDate = Date()
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { showSaveFeedback = false } }
         } else {
             withAnimation { showSaveFeedback = true }
