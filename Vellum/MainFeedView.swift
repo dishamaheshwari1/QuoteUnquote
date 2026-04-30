@@ -14,46 +14,66 @@ struct MainFeedView: View {
     var startID: UUID?
     var isFromLibrary: Bool = false
     
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+    @State private var navigateToOnboarding: Bool = false
+    
     var body: some View {
-        GeometryReader { geo in
-            ScrollViewReader { proxy in
-                ScrollView(.vertical) {
-                    LazyVStack(spacing: 0) {
-                        
-                        // 1. HISTORY FEED
-                        ForEach(historyQuotes) { quote in
-                            QuoteEditorView(quote: quote, isFromLibrary: isFromLibrary)
-                                // Strict absolute sizing
+        ZStack {
+            GeometryReader { geo in
+                ScrollViewReader { proxy in
+                    ScrollView(.vertical) {
+                        LazyVStack(spacing: 0) {
+                            ForEach(historyQuotes) { quote in
+                                QuoteEditorView(quote: quote, isFromLibrary: isFromLibrary)
+                                    .frame(width: geo.size.width, height: geo.size.height)
+                                    .id(quote.id)
+                            }
+                            
+                            QuoteEditorView(quote: nil, isFromLibrary: isFromLibrary)
                                 .frame(width: geo.size.width, height: geo.size.height)
-                                .id(quote.id)
+                                .id("NEW_ENTRY")
+                        }
+                        .scrollTargetLayout()
+                    }
+                    .scrollTargetBehavior(.paging)
+                    .scrollIndicators(.hidden)
+                    .onAppear {
+                        if let target = startID {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                proxy.scrollTo(target, anchor: .center)
+                            }
+                        } else {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                proxy.scrollTo("NEW_ENTRY", anchor: .bottom)
+                            }
                         }
                         
-                        // 2. NEW ENTRY
-                        QuoteEditorView(quote: nil, isFromLibrary: isFromLibrary)
-                            // Strict absolute sizing
-                            .frame(width: geo.size.width, height: geo.size.height)
-                            .id("NEW_ENTRY")
-                    }
-                    .scrollTargetLayout()
-                }
-                // THE FIX: Strict paging with no state-binding interruptions
-                .scrollTargetBehavior(.paging)
-                .scrollIndicators(.hidden)
-                // Prevent bouncing past the first/last quotes which messes up trackpad math
-                .scrollBounceBehavior(.basedOnSize)
-                .onAppear {
-                    if let target = startID {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            proxy.scrollTo(target, anchor: .center)
-                        }
-                    } else {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            proxy.scrollTo("NEW_ENTRY", anchor: .bottom)
+                        // First launch check
+                        if !hasSeenOnboarding {
+                            navigateToOnboarding = true
+                            hasSeenOnboarding = true
                         }
                     }
                 }
             }
-        }
-        .ignoresSafeArea(.all)
+            .ignoresSafeArea(.all)
+            
+            // --- TOP RIGHT HELP CAPSULE ---
+            .overlay(alignment: .topTrailing) {
+                Button(action: { navigateToOnboarding = true }) {
+                    Image(systemName: "questionmark")
+                        .font(.system(size: 20, weight: .light))
+                        .foregroundColor(.black)
+                        .padding(14)
+                        .background(Color.white.opacity(0.4))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .focusable(false)
+                .focusEffectDisabled()
+                .padding(.trailing, 40) // EXACT match to share button horizontal 40
+                .padding(.top, 30) // Symmetrical with traffic lights
+            }
+        } .navigationDestination(isPresented: $navigateToOnboarding) {OnboardingView()}
     }
 }
