@@ -10,12 +10,13 @@ import SwiftData
 
 @main
 struct VellumApp: App {
+    
+    // 1. We create a secure connection to your shared Widget folder
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Quote.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+        let schema = Schema([Quote.self])
+        
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier("group.com.maheshwariDisha.vellum"))
+        
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
@@ -24,16 +25,11 @@ struct VellumApp: App {
     }()
 
     var body: some Scene {
+        // 2. Your Main App Window
         WindowGroup {
-            NavigationStack {
-                MainFeedView()
-            }
-            .toolbar(.hidden, for: .windowToolbar)
-            // 1. Set the absolute minimum size the user can shrink it to
-            .frame(minWidth: 480, minHeight: 365)
+            MainFeedView()
         }
+        // 3. We attach the shared database to the main app so it saves in the right place!
         .modelContainer(sharedModelContainer)
-        // 2. Set the default size when the app is first launched
-        .defaultSize(width: 980, height: 620)
     }
 }
