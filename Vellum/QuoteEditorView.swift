@@ -16,6 +16,9 @@ struct QuoteEditorView: View {
     var isFromLibrary: Bool = false
     var isNewEntryMode: Bool { quote == nil }
     
+    // THE NAVIGATION FIX: This lets the MainFeedView handle the Gallery transition
+    let onGalleryClick: () -> Void
+    
     @State private var tempText: String = ""
     @State private var tempNote: String = ""
     @State private var tempColorIndex: Int = 0
@@ -81,6 +84,9 @@ struct QuoteEditorView: View {
                 .focusEffectDisabled()
                 .fontDesign(.serif)
                 .font(.system(size: dynamicQuoteFontSize, weight: .regular))
+                // THE TEXT JUMP FIXES:
+                .lineLimit(1...5)
+                .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor)
                 .tint(textColor)
@@ -121,7 +127,7 @@ struct QuoteEditorView: View {
                     return .ignored
                 }
             }
-            .frame(maxWidth: 650)
+            .frame(width: 550)
             .padding(.horizontal, 40)
             .padding(.vertical, 80)
             
@@ -147,7 +153,7 @@ struct QuoteEditorView: View {
                 tempDate = existingDate
             }
         }
-        // THE FIX: Perfect twin Help Button, dynamically colored!
+        // TOP HELP BUTTON
         .overlay(alignment: .topTrailing) {
             NavigationLink(destination: OnboardingView()) {
                 Image(systemName: "questionmark")
@@ -163,7 +169,7 @@ struct QuoteEditorView: View {
             .padding(.trailing, 40)
             .padding(.top, 30)
         }
-        // BOTTOM TOOLBAR & SHARE
+        // BOTTOM TOOLBAR
         .overlay(alignment: .bottom) {
             HStack {
                 HStack(spacing: 22) {
@@ -201,19 +207,12 @@ struct QuoteEditorView: View {
                     .buttonStyle(.plain)
                     .focusable(false)
                     
-                    if isFromLibrary {
-                        Button(action: { dismiss() }) {
-                            Image(systemName: "square.grid.2x2")
-                        }
-                        .buttonStyle(.plain)
-                        .focusable(false)
-                    } else {
-                        NavigationLink(destination: GalleryView()) {
-                            Image(systemName: "square.grid.2x2")
-                        }
-                        .buttonStyle(.plain)
-                        .focusable(false)
+                    // FIXED GALLERY BUTTON: Calls the parent closure
+                    Button(action: onGalleryClick) {
+                        Image(systemName: "square.grid.2x2")
                     }
+                    .buttonStyle(.plain)
+                    .focusable(false)
                 }
                 .font(.system(size: 20, weight: .light))
                 .foregroundColor(textColor)

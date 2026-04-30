@@ -11,10 +11,8 @@ import SwiftData
 @main
 struct VellumApp: App {
     
-    // 1. We create a secure connection to your shared Widget folder
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([Quote.self])
-        
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier("group.com.maheshwariDisha.vellum"))
         
         do {
@@ -25,11 +23,10 @@ struct VellumApp: App {
     }()
 
     var body: some Scene {
-        // 2. Your Main App Window
         WindowGroup {
             MainFeedView()
         }
-        // 3. We attach the shared database to the main app so it saves in the right place!
+        .windowStyle(.hiddenTitleBar)
         .modelContainer(sharedModelContainer)
     }
 }

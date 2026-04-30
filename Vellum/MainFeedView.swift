@@ -9,56 +9,61 @@ import SwiftUI
 import SwiftData
 
 struct MainFeedView: View {
-    @Query(sort: \Quote.dateCreated, order: .forward) private var historyQuotes: [Quote]
-    
     var startID: UUID?
     var isFromLibrary: Bool = false
     
+    @Query(sort: \Quote.dateCreated, order: .forward) private var historyQuotes: [Quote]
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
-    @State private var navigateToOnboarding: Bool = false
     
+    @State private var showOnboarding = false
+    @State private var showGallery = false
+
     var body: some View {
-        ZStack {
+        NavigationStack {
             GeometryReader { geo in
                 ScrollViewReader { proxy in
-                    ScrollView(.vertical) {
+                    ScrollView {
                         LazyVStack(spacing: 0) {
                             ForEach(historyQuotes) { quote in
-                                QuoteEditorView(quote: quote, isFromLibrary: isFromLibrary)
-                                    .frame(width: geo.size.width, height: geo.size.height)
-                                    .id(quote.id)
+                                QuoteEditorView(
+                                    quote: quote,
+                                    isFromLibrary: isFromLibrary,
+                                    onGalleryClick: { showGallery = true }
+                                )
+                                .frame(width: geo.size.width, height: geo.size.height)
+                                .id(quote.id) // Crucial for scrolling to work
                             }
                             
-                            QuoteEditorView(quote: nil, isFromLibrary: isFromLibrary)
-                                .frame(width: geo.size.width, height: geo.size.height)
-                                .id("NEW_ENTRY")
+                            QuoteEditorView(
+                                quote: nil,
+                                isFromLibrary: isFromLibrary,
+                                onGalleryClick: { showGallery = true }
+                            )
+                            .frame(width: geo.size.width, height: geo.size.height)
+                            .id("NEW_ENTRY")
                         }
-                        .scrollTargetLayout()
                     }
                     .scrollTargetBehavior(.paging)
-                    .scrollIndicators(.hidden)
                     .onAppear {
+                        // SMART SCROLLING:
+                        // If we come from the Gallery, scroll to the specific quote.
+                        // Otherwise, go to the blank new entry.
                         if let target = startID {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                proxy.scrollTo(target, anchor: .center)
-                            }
+                            proxy.scrollTo(target, anchor: .center)
                         } else {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                proxy.scrollTo("NEW_ENTRY", anchor: .bottom)
-                            }
+                            proxy.scrollTo("NEW_ENTRY", anchor: .bottom)
                         }
                         
                         if !hasSeenOnboarding {
-                            navigateToOnboarding = true
+                            showOnboarding = true
                             hasSeenOnboarding = true
                         }
                     }
                 }
             }
-            .ignoresSafeArea(.all)
-        }
-        .navigationDestination(isPresented: $navigateToOnboarding) {
-            OnboardingView()
+            .ignoresSafeArea()
+            .navigationDestination(isPresented: $showOnboarding) { OnboardingView() }
+            .navigationDestination(isPresented: $showGallery) { GalleryView() }
         }
     }
 }
