@@ -227,7 +227,10 @@ struct QuoteEditorView: View {
                 
                 Spacer()
                 
-                Button(action: { /* Share */ }) {
+                ShareLink(
+                    item: generateSnapshot(),
+                    preview: SharePreview("Vellum Quote", image: generateSnapshot())
+                ) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 20, weight: .light))
                         .foregroundColor(textColor)
@@ -237,6 +240,8 @@ struct QuoteEditorView: View {
                 }
                 .buttonStyle(.plain)
                 .focusable(false)
+                .disabled(currentText.isEmpty) // Prevents sharing an empty screen
+                .opacity(currentText.isEmpty ? 0.5 : 1.0)
             }
             .padding(.horizontal, 40)
             .padding(.bottom, 30)
@@ -286,5 +291,58 @@ struct QuoteEditorView: View {
             isFocused = false
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { withAnimation { showSaveFeedback = false } }
         }
+    }
+    
+    @MainActor
+    func generateSnapshot() -> Image {
+        let exportView = QuoteSnapshotView(
+            text: currentText.isEmpty ? " " : currentText, // Prevents tiny invisible boxes
+            note: currentNote,
+            backgroundColor: backgroundColors[activeColorIndex],
+            textColor: textColor
+        )
+            
+        let renderer = ImageRenderer(content: exportView)
+        renderer.scale = 2.0 // High-resolution export
+            
+        if let cgImage = renderer.cgImage {
+            return Image(cgImage, scale: 1.0, label: Text("Quote"))
+        }
+        return Image(systemName: "photo") // Fallback
+    }
+}
+
+// --- PICTURE EXPORT TEMPLATE ---
+struct QuoteSnapshotView: View {
+    let text: String
+    let note: String
+    let backgroundColor: Color
+    let textColor: Color
+    
+    var body: some View {
+        ZStack {
+            backgroundColor
+            Color.white.opacity(0.04).blendMode(.screen) // Preserves your glass texture
+            
+            VStack(spacing: 30) {
+                Text(text)
+                    .fontDesign(.serif)
+                    .font(.system(size: 46, weight: .regular))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(textColor)
+                
+                if !note.isEmpty {
+                    Text(note)
+                        .fontDesign(.serif)
+                        .font(.title2)
+                        .italic()
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(textColor.opacity(0.8))
+                }
+            }
+            .padding(80)
+        }
+        // Forces a beautiful, Instagram-ready square aspect ratio for exports
+        .frame(width: 1000, height: 1000)
     }
 }
