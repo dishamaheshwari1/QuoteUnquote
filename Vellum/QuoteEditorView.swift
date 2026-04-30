@@ -19,8 +19,6 @@ struct QuoteEditorView: View {
     @State private var tempText: String = ""
     @State private var tempNote: String = ""
     @State private var tempColorIndex: Int = 0
-    
-    // NEW: State for the Calendar Popover
     @State private var tempDate: Date = Date()
     @State private var showDatePicker: Bool = false
     
@@ -28,15 +26,15 @@ struct QuoteEditorView: View {
     @State private var showSaveFeedback: Bool = false
     
     let backgroundColors: [Color] = [
-        Color(red: 0.925, green: 0.784, blue: 0.604), // Sepia
-        Color(red: 0.6, green: 0.05, blue: 0.1),      // Ruby
-        Color(red: 0.8, green: 0.3, blue: 0.0),       // Orange
-        Color(red: 0.95, green: 0.75, blue: 0.1),     // Yellow
-        Color(red: 0.0, green: 0.4, blue: 0.25),      // Emerald
-        Color(red: 0.05, green: 0.2, blue: 0.5),      // Sapphire
-        Color(red: 0.35, green: 0.1, blue: 0.55),     // Purple
-        Color(red: 0.35, green: 0.2, blue: 0.05),     // Brown
-        Color(red: 0.25, green: 0.3, blue: 0.35),     // Slate
+        Color(red: 0.925, green: 0.784, blue: 0.604),
+        Color(red: 0.6, green: 0.05, blue: 0.1),
+        Color(red: 0.8, green: 0.3, blue: 0.0),
+        Color(red: 0.95, green: 0.75, blue: 0.1),
+        Color(red: 0.0, green: 0.4, blue: 0.25),
+        Color(red: 0.05, green: 0.2, blue: 0.5),
+        Color(red: 0.35, green: 0.1, blue: 0.55),
+        Color(red: 0.35, green: 0.2, blue: 0.05),
+        Color(red: 0.25, green: 0.3, blue: 0.35),
         Color.black
     ]
     
@@ -45,6 +43,29 @@ struct QuoteEditorView: View {
     var activeColorIndex: Int { isNewEntryMode ? tempColorIndex : (quote?.colorIndex ?? 0) }
     var isLightBackground: Bool { return activeColorIndex == 0 || activeColorIndex == 3 }
     var textColor: Color { isLightBackground ? .black : .white }
+    
+    // THE FIX: Custom Dynamic Font Math for the Main Quote
+    var dynamicQuoteFontSize: CGFloat {
+        let length = currentText.count
+        let baseSize = 38.0
+        let minSize = 18.0
+        let maxCharsToScale = 200.0 // The font stops shrinking after 200 extra characters
+        
+        // Wait until 40 characters before starting to shrink
+        let progress = min(1.0, CGFloat(max(0, length - 40)) / maxCharsToScale)
+        return baseSize - ((baseSize - minSize) * progress)
+    }
+    
+    // THE FIX: Custom Dynamic Font Math for the Note
+    var dynamicNoteFontSize: CGFloat {
+        let length = currentNote.count
+        let baseSize = 20.0
+        let minSize = 14.0
+        let maxCharsToScale = 100.0
+        
+        let progress = min(1.0, CGFloat(max(0, length - 20)) / maxCharsToScale)
+        return baseSize - ((baseSize - minSize) * progress)
+    }
     
     var body: some View {
         ZStack {
@@ -57,6 +78,7 @@ struct QuoteEditorView: View {
             .onTapGesture { isFocused = false }
             
             VStack(spacing: 25) {
+                // MAIN QUOTE INPUT
                 TextField("", text: Binding(
                     get: { currentText },
                     set: { val in if isNewEntryMode { tempText = val } else { quote!.text = val } }
@@ -64,46 +86,62 @@ struct QuoteEditorView: View {
                 .textFieldStyle(.plain)
                 .focusEffectDisabled()
                 .fontDesign(.serif)
-                .font(.system(size: 38, weight: .regular))
+                // THE FIX: We inject our dynamically calculated font size here!
+                .font(.system(size: dynamicQuoteFontSize, weight: .regular))
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor)
                 .tint(textColor)
                 .focused($isFocused)
+                // Add a smooth animation so the font size change feels liquid
+                .animation(.interactiveSpring, value: dynamicQuoteFontSize)
                 .onKeyPress { keyPress in
-                    if keyPress.key == .return && keyPress.modifiers.isEmpty {
-                        isFocused = false
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { saveAction() }
-                        return .handled
-                    }
-                    return .ignored
-                }
-                
-                if isNewEntryMode || !currentNote.isEmpty {
-                    TextField("", text: Binding(
-                        get: { currentNote },
-                        set: { val in if isNewEntryMode { tempNote = val } else { quote!.note = val } }
-                    ), prompt: Text("note to self...").foregroundColor(textColor.opacity(0.35)))
-                    .textFieldStyle(.plain)
-                    .focusEffectDisabled()
-                    .fontDesign(.serif)
-                    .font(.title3)
-                    .italic()
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(textColor.opacity(0.6))
-                    .tint(textColor)
-                    .focused($isFocused)
-                    .onKeyPress { keyPress in
-                        if keyPress.key == .return && keyPress.modifiers.isEmpty {
+                    if keyPress.key == .return {
+                        // If ONLY Enter is pressed, save the quote
+                        if keyPress.modifiers.isEmpty {
                             isFocused = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { saveAction() }
                             return .handled
                         }
-                        return .ignored
                     }
+                    return .ignored
+                }
+                
+                // NOTE TO SELF INPUT
+                TextField("", text: Binding(
+                    get: { currentNote },
+                    set: { val in if isNewEntryMode { tempNote = val } else { quote!.note = val } }
+                ), prompt: Text("note to self...").foregroundColor(textColor.opacity(0.35)))
+                .textFieldStyle(.plain)
+                .focusEffectDisabled()
+                .fontDesign(.serif)
+                // THE FIX: Inject the dynamic note size
+                .font(.system(size: dynamicNoteFontSize, weight: .regular).italic())
+                .multilineTextAlignment(.center)
+                .foregroundColor(textColor.opacity(0.6))
+                .tint(textColor)
+                .focused($isFocused)
+                .animation(.interactiveSpring, value: dynamicNoteFontSize)
+                .onKeyPress { keyPress in
+                    if keyPress.key == .return {
+                        if keyPress.modifiers.isEmpty {
+                            isFocused = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { saveAction() }
+                            return .handled
+                        } else if keyPress.modifiers.contains(.shift) {
+                            if isNewEntryMode {
+                                tempNote += "\n"
+                            } else {
+                                quote?.note += "\n"
+                            }
+                            return .handled
+                        }
+                    }
+                    return .ignored
                 }
             }
             .frame(maxWidth: 650)
             .padding(.horizontal, 40)
+            .padding(.vertical, 80)
             
             Group {
                 Button("") { changeColor(direction: -1) }.keyboardShortcut(.leftArrow, modifiers: .command)
@@ -123,7 +161,6 @@ struct QuoteEditorView: View {
         .focusable()
         .focusEffectDisabled()
         .onAppear {
-            // Load the existing date if we are viewing an old quote
             if let existingDate = quote?.dateCreated {
                 tempDate = existingDate
             }
@@ -141,21 +178,17 @@ struct QuoteEditorView: View {
                         .transition(.scale.combined(with: .opacity))
                     }
                     
-                    // NEW: Calendar Button with fixes
                     Button(action: {
                         showDatePicker.toggle()
-                        // Explicitly drop focus to help strip the blue ring
                         isFocused = false
                     }) {
                         Image(systemName: "calendar")
                     }
                     .buttonStyle(.plain)
                     .focusable(false)
-                    // THE FIXES: Kill focus effect and set dynamic text color
                     .focusEffectDisabled()
                     .foregroundColor(textColor)
                     .popover(isPresented: $showDatePicker, arrowEdge: .top) {
-                        // REMOVED: Redundant "Select Date" caption
                         DatePicker("", selection: $tempDate, displayedComponents: .date)
                             .datePickerStyle(.graphical)
                             .padding()
@@ -239,14 +272,12 @@ struct QuoteEditorView: View {
     func saveAction() {
         if isNewEntryMode {
             guard !tempText.isEmpty else { return }
-            // Pass the newly selected tempDate when creating a new quote
             let newQuote = Quote(text: tempText, note: tempNote, colorIndex: tempColorIndex)
             newQuote.dateCreated = tempDate
             modelContext.insert(newQuote)
             
             withAnimation { showSaveFeedback = true }
             tempText = ""; tempNote = ""; isFocused = false
-            // Reset the date for the next entry
             tempDate = Date()
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { showSaveFeedback = false } }

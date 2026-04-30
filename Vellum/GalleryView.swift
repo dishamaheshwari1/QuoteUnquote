@@ -29,38 +29,32 @@ struct GalleryView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // --- CUSTOM SLEEK HEADER ---
-            HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(10) // THE FIX: Tighter button padding
-                        .background(Color.white.opacity(0.1))
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(.white.opacity(0.2), lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-                .focusable(false)
-                
-                Spacer()
-                
+            // --- CUSTOM ULTRA-SLEEK HEADER ---
+            ZStack {
                 Text("My Quotes")
                     .fontDesign(.serif)
-                    .font(.title3) // THE FIX: Slightly smaller, more elegant font
+                    .font(.title3)
                     .foregroundColor(.white)
                 
-                Spacer()
-                
-                // Invisible placeholder to keep the text perfectly centered
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 14, weight: .semibold))
-                    .padding(10)
-                    .opacity(0)
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 28, height: 28)
+                            .background(Color.white.opacity(0.1))
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(.white.opacity(0.2), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .focusable(false)
+                    
+                    Spacer()
+                }
             }
             .padding(.horizontal, 24)
-            .padding(.vertical, 10) // THE FIX: Halved the vertical thickness
-            .background(Color.black)
+            .padding(.bottom, 14)
+            .background(Color.black.ignoresSafeArea(edges: .top))
             
             // --- THE GRID ---
             ScrollView {
@@ -76,7 +70,8 @@ struct GalleryView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(24)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 16)
                 }
             }
         }
@@ -93,23 +88,38 @@ struct QuoteGridItem: View {
     var isLight: Bool { quote.colorIndex == 0 || quote.colorIndex == 3 }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 4) {
+            
+            // 1. TOP: The Caption
+            if !quote.note.isEmpty {
+                Text(quote.note)
+                    .fontDesign(.serif)
+                    .font(.subheadline)
+                    .italic()
+                    .lineLimit(1)
+                    .foregroundColor(isLight ? .black.opacity(0.7) : .white.opacity(0.7))
+            } else {
+                Text(" ")
+                    .font(.subheadline)
+            }
+            
+            // 2. MIDDLE: The Actual Quote
             Text(quote.text)
                 .fontDesign(.serif)
-                .font(.headline)
-                .lineLimit(4)
+                .font(.system(size: 26))
+                .minimumScaleFactor(0.3)
                 .multilineTextAlignment(.leading)
                 .foregroundColor(isLight ? .black : .white)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             
-            Spacer()
-            
+            // 3. BOTTOM: Date
             Text(quote.dateCreated.formatted(date: .abbreviated, time: .omitted))
                 .font(.caption)
                 .foregroundColor(isLight ? .black.opacity(0.6) : .white.opacity(0.6))
         }
         .frame(height: 160)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
+        .padding(20)
         .background(color)
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(
