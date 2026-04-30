@@ -257,6 +257,7 @@ struct QuoteEditorView: View {
         
         let renderer = ImageRenderer(content: exportView)
         renderer.scale = 2.0
+        renderer.isOpaque = true
         
         if let cgImage = renderer.cgImage {
             return Image(cgImage, scale: 1.0, label: Text("Quote"))
