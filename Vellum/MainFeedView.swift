@@ -48,7 +48,6 @@ struct MainFeedView: View {
                             }
                         }
                         
-                        // First launch check
                         if !hasSeenOnboarding {
                             navigateToOnboarding = true
                             hasSeenOnboarding = true
@@ -58,22 +57,30 @@ struct MainFeedView: View {
             }
             .ignoresSafeArea(.all)
             
-            // --- TOP RIGHT HELP CAPSULE ---
-            .overlay(alignment: .topTrailing) {
-                Button(action: { navigateToOnboarding = true }) {
-                    Image(systemName: "questionmark")
-                        .font(.system(size: 20, weight: .light))
-                        .foregroundColor(.black)
-                        .padding(14)
-                        .background(Color.white.opacity(0.4))
-                        .clipShape(Circle())
+            // --- PERFECTLY ALIGNED TOP RIGHT HELP BUTTON ---
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: { navigateToOnboarding = true }) {
+                        Image(systemName: "questionmark")
+                            .font(.system(size: 20, weight: .light)) // Twin to Share
+                            .foregroundColor(.black) // Twin to Share
+                            .padding(14)
+                            .background(Color.white.opacity(0.4)) // Twin to Share
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .focusable(false)
+                    .focusEffectDisabled()
+                    .padding(.trailing, 40) // Exact alignment
+                    .padding(.top, 30) // Exact alignment
                 }
-                .buttonStyle(.plain)
-                .focusable(false)
-                .focusEffectDisabled()
-                .padding(.trailing, 40) // EXACT match to share button horizontal 40
-                .padding(.top, 30) // Symmetrical with traffic lights
+                Spacer()
             }
-        } .navigationDestination(isPresented: $navigateToOnboarding) {OnboardingView()}
+            .ignoresSafeArea(.all) // Guarantees true edge measurement
+        }
+        .navigationDestination(isPresented: $navigateToOnboarding) {
+            OnboardingView()
+        }
     }
 }

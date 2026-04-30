@@ -10,7 +10,7 @@ import SwiftUI
 struct OnboardingView: View {
     @Environment(\.dismiss) private var dismiss
     
-    let contactEmail = "hello@yourdomain.com"
+    let contactEmail = "disha.maheshwari@me.com"
     let sepiaColor = Color(red: 0.925, green: 0.784, blue: 0.604)
     
     var body: some View {
@@ -54,7 +54,6 @@ struct OnboardingView: View {
                             .foregroundColor(.black)
                             .padding(.horizontal, 40)
                             .padding(.vertical, 16)
-                            // Matched exactly to the other buttons
                             .background(Color.white.opacity(0.4))
                             .clipShape(Capsule())
                     }
@@ -62,11 +61,13 @@ struct OnboardingView: View {
                     .focusable(false)
                     .focusEffectDisabled()
                     .padding(.top, 10)
+                    // THE FIX: Surgically nudges the button up to perfectly align with the right-side text baseline
+                    .offset(y: -16)
                 }
                 .frame(maxWidth: 450, alignment: .leading)
                 
                 // RIGHT SIDE: Commands
-                VStack(alignment: .leading, spacing: 35) {
+                VStack(alignment: .leading, spacing: 20) {
                     OnboardingRow(icon: "hand.draw", title: "Trackpad Scroll", desc: "Navigate effortlessly through your timeline.")
                     OnboardingRow(icon: "arrow.left.and.right.square", title: "⌘ + Arrows", desc: "Change the background canvas color.")
                     OnboardingRow(icon: "return", title: "Press Enter", desc: "Instantly save your current quote.")
@@ -77,24 +78,30 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 60)
             
-            // --- TOP LEFT BACK BUTTON (Identical Twin) ---
+            // --- PERFECTLY ALIGNED TOP LEFT BACK BUTTON ---
+            VStack {
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 20, weight: .light))
+                            .foregroundColor(.black)
+                            .padding(14)
+                            .background(Color.white.opacity(0.4))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .focusable(false)
+                    .focusEffectDisabled()
+                    .padding(.leading, 40)
+                    .padding(.top, 30)
+                    
+                    Spacer()
+                }
+                Spacer()
+            }
+            .ignoresSafeArea(.all)
         }
         .navigationBarBackButtonHidden(true)
-        .overlay(alignment: .topLeading) {
-            Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 20, weight: .light))
-                    .foregroundColor(.black)
-                    .padding(14)
-                    .background(Color.white.opacity(0.4))
-                    .clipShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .focusable(false)
-            .focusEffectDisabled()
-            .padding(.leading, 40)
-            .padding(.top, 30)
-        }
     }
 }
 
