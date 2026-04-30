@@ -41,10 +41,13 @@ struct OnboardingView: View {
                             .font(.headline)
                             .foregroundColor(.black.opacity(0.6))
                         
-                        Link(contactEmail, destination: URL(string: "mailto:\(contactEmail)")!)
-                            .fontDesign(.serif)
-                            .font(.title3)
-                            .foregroundColor(.black)
+                        Link(destination: URL(string: "mailto:\(contactEmail)")!) {
+                            Text(contactEmail)
+                                .fontDesign(.serif)
+                                .font(.title3)
+                                .foregroundColor(.black)
+                                .underline()
+                        }
                     }
                     
                     Button(action: { dismiss() }) {
