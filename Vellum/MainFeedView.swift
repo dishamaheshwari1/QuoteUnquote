@@ -56,28 +56,6 @@ struct MainFeedView: View {
                 }
             }
             .ignoresSafeArea(.all)
-            
-            // --- PERFECTLY ALIGNED TOP RIGHT HELP BUTTON ---
-            VStack {
-                HStack {
-                    Spacer()
-                    Button(action: { navigateToOnboarding = true }) {
-                        Image(systemName: "questionmark")
-                            .font(.system(size: 20, weight: .light)) // Twin to Share
-                            .foregroundColor(.black) // Twin to Share
-                            .padding(14)
-                            .background(Color.white.opacity(0.4)) // Twin to Share
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .focusable(false)
-                    .focusEffectDisabled()
-                    .padding(.trailing, 40) // Exact alignment
-                    .padding(.top, 30) // Exact alignment
-                }
-                Spacer()
-            }
-            .ignoresSafeArea(.all) // Guarantees true edge measurement
         }
         .navigationDestination(isPresented: $navigateToOnboarding) {
             OnboardingView()

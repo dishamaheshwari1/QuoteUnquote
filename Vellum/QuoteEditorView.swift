@@ -44,25 +44,20 @@ struct QuoteEditorView: View {
     var isLightBackground: Bool { return activeColorIndex == 0 || activeColorIndex == 3 }
     var textColor: Color { isLightBackground ? .black : .white }
     
-    // THE FIX: Custom Dynamic Font Math for the Main Quote
     var dynamicQuoteFontSize: CGFloat {
         let length = currentText.count
         let baseSize = 38.0
         let minSize = 18.0
-        let maxCharsToScale = 200.0 // The font stops shrinking after 200 extra characters
-        
-        // Wait until 40 characters before starting to shrink
+        let maxCharsToScale = 200.0
         let progress = min(1.0, CGFloat(max(0, length - 40)) / maxCharsToScale)
         return baseSize - ((baseSize - minSize) * progress)
     }
     
-    // THE FIX: Custom Dynamic Font Math for the Note
     var dynamicNoteFontSize: CGFloat {
         let length = currentNote.count
         let baseSize = 20.0
         let minSize = 14.0
         let maxCharsToScale = 100.0
-        
         let progress = min(1.0, CGFloat(max(0, length - 20)) / maxCharsToScale)
         return baseSize - ((baseSize - minSize) * progress)
     }
@@ -78,7 +73,6 @@ struct QuoteEditorView: View {
             .onTapGesture { isFocused = false }
             
             VStack(spacing: 25) {
-                // MAIN QUOTE INPUT
                 TextField("", text: Binding(
                     get: { currentText },
                     set: { val in if isNewEntryMode { tempText = val } else { quote!.text = val } }
@@ -86,17 +80,14 @@ struct QuoteEditorView: View {
                 .textFieldStyle(.plain)
                 .focusEffectDisabled()
                 .fontDesign(.serif)
-                // THE FIX: We inject our dynamically calculated font size here!
                 .font(.system(size: dynamicQuoteFontSize, weight: .regular))
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor)
                 .tint(textColor)
                 .focused($isFocused)
-                // Add a smooth animation so the font size change feels liquid
                 .animation(.interactiveSpring, value: dynamicQuoteFontSize)
                 .onKeyPress { keyPress in
                     if keyPress.key == .return {
-                        // If ONLY Enter is pressed, save the quote
                         if keyPress.modifiers.isEmpty {
                             isFocused = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { saveAction() }
@@ -106,7 +97,6 @@ struct QuoteEditorView: View {
                     return .ignored
                 }
                 
-                // NOTE TO SELF INPUT
                 TextField("", text: Binding(
                     get: { currentNote },
                     set: { val in if isNewEntryMode { tempNote = val } else { quote!.note = val } }
@@ -114,7 +104,6 @@ struct QuoteEditorView: View {
                 .textFieldStyle(.plain)
                 .focusEffectDisabled()
                 .fontDesign(.serif)
-                // THE FIX: Inject the dynamic note size
                 .font(.system(size: dynamicNoteFontSize, weight: .regular).italic())
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor.opacity(0.6))
@@ -126,13 +115,6 @@ struct QuoteEditorView: View {
                         if keyPress.modifiers.isEmpty {
                             isFocused = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { saveAction() }
-                            return .handled
-                        } else if keyPress.modifiers.contains(.shift) {
-                            if isNewEntryMode {
-                                tempNote += "\n"
-                            } else {
-                                quote?.note += "\n"
-                            }
                             return .handled
                         }
                     }
@@ -165,7 +147,23 @@ struct QuoteEditorView: View {
                 tempDate = existingDate
             }
         }
-        
+        // THE FIX: Perfect twin Help Button, dynamically colored!
+        .overlay(alignment: .topTrailing) {
+            NavigationLink(destination: OnboardingView()) {
+                Image(systemName: "questionmark")
+                    .font(.system(size: 20, weight: .light))
+                    .foregroundColor(textColor)
+                    .padding(14)
+                    .background(isLightBackground ? Color.white.opacity(0.4) : Color.black.opacity(0.3))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .focusable(false)
+            .focusEffectDisabled()
+            .padding(.trailing, 40)
+            .padding(.top, 30)
+        }
+        // BOTTOM TOOLBAR & SHARE
         .overlay(alignment: .bottom) {
             HStack {
                 HStack(spacing: 22) {
@@ -240,12 +238,30 @@ struct QuoteEditorView: View {
                 }
                 .buttonStyle(.plain)
                 .focusable(false)
-                .disabled(currentText.isEmpty) // Prevents sharing an empty screen
+                .disabled(currentText.isEmpty)
                 .opacity(currentText.isEmpty ? 0.5 : 1.0)
             }
             .padding(.horizontal, 40)
             .padding(.bottom, 30)
         }
+    }
+    
+    @MainActor
+    func generateSnapshot() -> Image {
+        let exportView = QuoteSnapshotView(
+            text: currentText.isEmpty ? " " : currentText,
+            note: currentNote,
+            backgroundColor: backgroundColors[activeColorIndex],
+            textColor: textColor
+        )
+        
+        let renderer = ImageRenderer(content: exportView)
+        renderer.scale = 2.0
+        
+        if let cgImage = renderer.cgImage {
+            return Image(cgImage, scale: 1.0, label: Text("Quote"))
+        }
+        return Image(systemName: "photo")
     }
     
     func deleteAction() {
@@ -292,27 +308,9 @@ struct QuoteEditorView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { withAnimation { showSaveFeedback = false } }
         }
     }
-    
-    @MainActor
-    func generateSnapshot() -> Image {
-        let exportView = QuoteSnapshotView(
-            text: currentText.isEmpty ? " " : currentText, // Prevents tiny invisible boxes
-            note: currentNote,
-            backgroundColor: backgroundColors[activeColorIndex],
-            textColor: textColor
-        )
-            
-        let renderer = ImageRenderer(content: exportView)
-        renderer.scale = 2.0 // High-resolution export
-            
-        if let cgImage = renderer.cgImage {
-            return Image(cgImage, scale: 1.0, label: Text("Quote"))
-        }
-        return Image(systemName: "photo") // Fallback
-    }
 }
 
-// --- PICTURE EXPORT TEMPLATE ---
+// --- OFF-SCREEN EXPORT TEMPLATE ---
 struct QuoteSnapshotView: View {
     let text: String
     let note: String
@@ -322,7 +320,7 @@ struct QuoteSnapshotView: View {
     var body: some View {
         ZStack {
             backgroundColor
-            Color.white.opacity(0.04).blendMode(.screen) // Preserves your glass texture
+            Color.white.opacity(0.04).blendMode(.screen)
             
             VStack(spacing: 30) {
                 Text(text)
@@ -342,7 +340,6 @@ struct QuoteSnapshotView: View {
             }
             .padding(80)
         }
-        // Forces a beautiful, Instagram-ready square aspect ratio for exports
         .frame(width: 1000, height: 1000)
     }
 }
