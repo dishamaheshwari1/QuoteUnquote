@@ -1,6 +1,6 @@
 //
-//  VellumWidget.swift
-//  VellumWidget
+//  QuoteUnquoteWidget.swift
+//  QuoteUnquoteWidget
 //
 //  Created by Disha Maheshwari on 4/30/26.
 //
@@ -65,7 +65,7 @@ struct SimpleEntry: TimelineEntry {
 }
 
 // 3. THE VISUAL UI
-struct VellumWidgetEntryView : View {
+struct QuoteUnquoteWidgetEntryView : View {
     var entry: Provider.Entry
     
     let backgroundColors: [Color] = [
@@ -106,7 +106,7 @@ struct VellumWidgetEntryView : View {
                             .padding(.top, 4)
                     }
                 } else {
-                    Text("No quotes yet.\nOpen Vellum to add some!")
+                    Text("No quotes yet.\nOpen app to add some!")
                         .fontDesign(.serif)
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.secondary)
@@ -135,14 +135,14 @@ struct VellumWidgetEntryView : View {
 
 // 4. THE MAIN WIDGET DEFINITION
 @main
-struct VellumWidget: Widget {
-    let kind: String = "VellumWidget"
+struct QuoteUnquoteWidget: Widget {
+    let kind: String = "QuoteUnquoteWidget"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            VellumWidgetEntryView(entry: entry)
+            QuoteUnquoteWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Vellum Quote")
+        .configurationDisplayName("Quote Unquote")
         .description("Displays a random quote from your journal.")
         .supportedFamilies([.systemMedium, .systemLarge])
     }

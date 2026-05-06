@@ -1,6 +1,6 @@
 //
 //  QuoteEditorView.swift
-//  Vellum
+//  Quote Unquote
 //
 //  Created by Disha Maheshwari on 4/29/26.
 //
@@ -226,7 +226,7 @@ struct QuoteEditorView: View {
                 
                 ShareLink(
                     item: generateSnapshot(),
-                    preview: SharePreview("Vellum Quote", image: generateSnapshot())
+                    preview: SharePreview("Quote", image: generateSnapshot())
                 ) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 20, weight: .light))

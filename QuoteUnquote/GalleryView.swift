@@ -1,6 +1,6 @@
 //
 //  GalleryView.swift
-//  Vellum
+//  Quote Unquote
 //
 //  Created by Disha Maheshwari on 4/29/26.
 //

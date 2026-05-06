@@ -1,6 +1,6 @@
 //
 //  OnboardingView.swift
-//  Vellum
+//  Quote Unquote
 //
 //  Created by Disha Maheshwari on 4/30/26.
 //
@@ -24,7 +24,7 @@ struct OnboardingView: View {
                 // LEFT SIDE: Title & Action
                 VStack(alignment: .leading, spacing: 40) {
                     VStack(alignment: .leading, spacing: 15) {
-                        Text("Vellum")
+                        Text("Quote Unquote")
                             .fontDesign(.serif)
                             .font(.system(size: 72, weight: .regular))
                             .foregroundColor(.black)

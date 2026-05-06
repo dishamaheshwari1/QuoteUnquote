@@ -1,6 +1,6 @@
 //
-//  VellumApp.swift
-//  Vellum
+//  QuoteUnquoteApp.swift
+//  Quote Unquote
 //
 //  Created by Disha Maheshwari on 4/29/26.
 //
@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct VellumApp: App {
+struct QuoteUnquoteApp: App {
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([Quote.self])
