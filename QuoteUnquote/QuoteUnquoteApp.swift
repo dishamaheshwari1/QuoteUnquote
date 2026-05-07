@@ -28,5 +28,6 @@ struct QuoteUnquoteApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .modelContainer(sharedModelContainer)
+        .defaultSize(width: 820, height: 520)
     }
 }
