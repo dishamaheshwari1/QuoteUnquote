@@ -42,7 +42,6 @@
 		9819BDBB2FA3F00600C653BF /* QuoteUnquoteWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuoteUnquoteWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9819BDBD2FA3F00600C653BF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		9819BDBF2FA3F00600C653BF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		9819BDD22FA3F3D600C653BF /* QuoteUnquoteWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuoteUnquoteWidgetExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -106,7 +105,6 @@
 		9819BD412FA2B9BF00C653BF = {
 			isa = PBXGroup;
 			children = (
-				9819BDD22FA3F3D600C653BF /* QuoteUnquoteWidgetExtension.entitlements */,
 				9819BD4C2FA2B9BF00C653BF /* QuoteUnquote */,
 				9819BDC12FA3F00600C653BF /* QuoteUnquoteWidget */,
 				9819BDBC2FA3F00600C653BF /* Frameworks */,
@@ -390,7 +388,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = Quotes;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = Vellum/Vellum.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QuoteUnquote/QuoteUnquote.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -435,7 +433,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = Quotes;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = Vellum/Vellum.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QuoteUnquote/QuoteUnquote.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -479,7 +477,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = VellumWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QuoteUnquoteWidget/QuoteUnquoteWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7G3KPPDR9K;
@@ -512,7 +510,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = VellumWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QuoteUnquoteWidget/QuoteUnquoteWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7G3KPPDR9K;
