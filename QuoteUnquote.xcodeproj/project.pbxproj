@@ -10,6 +10,7 @@
 		9819BDBE2FA3F00600C653BF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9819BDBD2FA3F00600C653BF /* WidgetKit.framework */; };
 		9819BDC02FA3F00600C653BF /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9819BDBF2FA3F00600C653BF /* SwiftUI.framework */; };
 		9819BDCB2FA3F00800C653BF /* QuoteUnquoteWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9819BDBB2FA3F00600C653BF /* QuoteUnquoteWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		987E2D952FAC177B00C98D4F /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 987E2D942FAC177B00C98D4F /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,6 +87,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				987E2D952FAC177B00C98D4F /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,6 +154,7 @@
 			);
 			name = QuoteUnquote;
 			packageProductDependencies = (
+				987E2D942FAC177B00C98D4F /* Sparkle */,
 			);
 			productName = Vellum;
 			productReference = 9819BD4A2FA2B9BF00C653BF /* QuoteUnquote.app */;
@@ -206,6 +209,9 @@
 			);
 			mainGroup = 9819BD412FA2B9BF00C653BF;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				987E2D932FAC177B00C98D4F /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9819BD4B2FA2B9BF00C653BF /* Products */;
 			projectDirPath = "";
@@ -565,6 +571,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		987E2D932FAC177B00C98D4F /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		987E2D942FAC177B00C98D4F /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 987E2D932FAC177B00C98D4F /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9819BD422FA2B9BF00C653BF /* Project object */;
 }
