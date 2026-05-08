@@ -7,9 +7,28 @@
 
 import SwiftUI
 import SwiftData
+import Sparkle
+import Combine
+
+// The controller that manages the Sparkle background checks
+class UpdaterViewModel: ObservableObject {
+    @Published var canCheckForUpdates = false
+    private let updaterController: SPUStandardUpdaterController
+
+    init() {
+        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        updaterController.updater.publisher(for: \.canCheckForUpdates)
+            .assign(to: &$canCheckForUpdates)
+    }
+
+    func checkForUpdates() {
+        updaterController.checkForUpdates(nil)
+    }
+}
 
 @main
 struct QuoteUnquoteApp: App {
+    @StateObject private var updaterViewModel = UpdaterViewModel()
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([Quote.self])
@@ -29,5 +48,13 @@ struct QuoteUnquoteApp: App {
         .windowStyle(.hiddenTitleBar)
         .modelContainer(sharedModelContainer)
         .defaultSize(width: 820, height: 520)
+        .commands {
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates...") {
+                    updaterViewModel.checkForUpdates()
+                }
+                .disabled(!updaterViewModel.canCheckForUpdates)
+            }
+        }
     }
 }
