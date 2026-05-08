@@ -60,12 +60,20 @@
 			);
 			target = 9819BDBA2FA3F00600C653BF /* QuoteUnquoteWidgetExtension */;
 		};
+		987E2DB42FAD534A00C98D4F /* Exceptions for "QuoteUnquote" folder in "QuoteUnquote" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 9819BD492FA2B9BF00C653BF /* QuoteUnquote */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9819BD4C2FA2B9BF00C653BF /* QuoteUnquote */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				987E2DB42FAD534A00C98D4F /* Exceptions for "QuoteUnquote" folder in "QuoteUnquote" target */,
 				9819BDD42FA3F55500C653BF /* Exceptions for "QuoteUnquote" folder in "QuoteUnquoteWidgetExtension" target */,
 			);
 			path = QuoteUnquote;
@@ -407,6 +415,7 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = QuoteUnquote/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Quote Unquote";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -452,6 +461,7 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = QuoteUnquote/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Quote Unquote";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
