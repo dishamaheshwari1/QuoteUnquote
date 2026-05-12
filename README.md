@@ -29,4 +29,4 @@ QuoteUnquote features built-in automatic updates.
 * When an update is found, it will download and install itself with a single click.
 
 ## License
-*Deciding on a license...*
+Copyright 2026. All rights reserved.
