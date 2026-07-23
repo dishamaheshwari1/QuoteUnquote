@@ -29,11 +29,16 @@ final class Quote {
     // This is much lighter on storage than saving the full color data.
     var colorIndex: Int
     
-    init(text: String, note: String, colorIndex: Int) {
+    // The tags string for organizing quotes
+    // A default empty string ensures backward compatibility with old saves
+    var tags: String = ""
+    
+    init(text: String, note: String, colorIndex: Int, tags: String = "") {
         self.id = UUID()
         self.text = text
         self.note = note
         self.dateCreated = Date()
         self.colorIndex = colorIndex
+        self.tags = tags
     }
 }

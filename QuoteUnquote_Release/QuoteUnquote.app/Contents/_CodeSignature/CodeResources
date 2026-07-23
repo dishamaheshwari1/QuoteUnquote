@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/Assets.car</key>
 		<data>
-		L2out4nCQBDfuMsR0dunfllcwYc=
+		kSwyfoeAftfpC09uAKBGdqsToug=
 		</data>
 		<key>Resources/Quotes.icns</key>
 		<data>
@@ -28,7 +28,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			7XJ+tQRn0AtDLw4bNL7qPk13Wro=
+			oUBx/mb8DTJe+4E5+O9MvZUZ5QM=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.dishaMaheshwari.Vellum.VellumWidget" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Disha Maheshwari (Q98NLMCVD3)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -37,7 +37,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			8R0pbbdf85hXIabJWCEp6xZ2WKPVrSLwnSZQYhKyLec=
+			miNggZM4g+eIUJL1vMv+4jy6aB+czj3RsQCT09Ilvnc=
 			</data>
 		</dict>
 		<key>Resources/Quotes.icns</key>

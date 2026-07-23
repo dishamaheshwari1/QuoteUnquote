@@ -21,6 +21,7 @@ struct QuoteEditorView: View {
     
     @State private var tempText: String = ""
     @State private var tempNote: String = ""
+    @State private var tempTags: String = "" // Added to hold new tags
     @State private var tempColorIndex: Int = 0
     @State private var tempDate: Date = Date()
     @State private var showDatePicker: Bool = false
@@ -43,6 +44,7 @@ struct QuoteEditorView: View {
     
     var currentText: String { isNewEntryMode ? tempText : quote!.text }
     var currentNote: String { isNewEntryMode ? tempNote : quote!.note }
+    var currentTags: String { isNewEntryMode ? tempTags : quote!.tags } // Computed property for tags
     var activeColorIndex: Int { isNewEntryMode ? tempColorIndex : (quote?.colorIndex ?? 0) }
     var isLightBackground: Bool { return activeColorIndex == 0 || activeColorIndex == 3 }
     var textColor: Color { isLightBackground ? .black : .white }
@@ -76,6 +78,30 @@ struct QuoteEditorView: View {
             .onTapGesture { isFocused = false }
             
             VStack(spacing: 25) {
+                
+                // TAGS TEXTFIELD
+                TextField("", text: Binding(
+                    get: { currentTags },
+                    set: { val in if isNewEntryMode { tempTags = val } else { quote!.tags = val } }
+                ), prompt: Text("add tags here").foregroundColor(textColor.opacity(0.35)))
+                .textFieldStyle(.plain)
+                .focusEffectDisabled()
+                .fontDesign(.serif)
+                .font(.system(size: 16, weight: .semibold))
+                .multilineTextAlignment(.center)
+                .foregroundColor(textColor.opacity(0.8))
+                .tint(textColor)
+                .focused($isFocused)
+                .onKeyPress { keyPress in
+                    if keyPress.key == .return && keyPress.modifiers.isEmpty {
+                        isFocused = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { saveAction() }
+                        return .handled
+                    }
+                    return .ignored
+                }
+                
+                // QUOTE TEXTFIELD
                 TextField("", text: Binding(
                     get: { currentText },
                     set: { val in if isNewEntryMode { tempText = val } else { quote!.text = val } }
@@ -103,6 +129,7 @@ struct QuoteEditorView: View {
                     return .ignored
                 }
                 
+                // NOTE TEXTFIELD
                 TextField("", text: Binding(
                     get: { currentNote },
                     set: { val in if isNewEntryMode { tempNote = val } else { quote!.note = val } }
@@ -245,6 +272,32 @@ struct QuoteEditorView: View {
         }
     }
     
+    // MARK: - Tag Formatting Logic
+    func formatTags(_ input: String) -> String {
+        guard !input.isEmpty else { return "" }
+        
+        // 1. Remove any commas
+        let noCommas = input.replacingOccurrences(of: ",", with: "")
+        
+        // 2. Split into an array using the hashtag as the separator
+        let rawTags = noCommas.split(separator: "#")
+        
+        // 3. Process each tag
+        let formatted = rawTags.compactMap { tag -> String? in
+            let trimmed = tag.trimmingCharacters(in: .whitespaces)
+            guard !trimmed.isEmpty else { return nil }
+            
+            // Replace internal spaces with hyphens
+            let hyphenated = trimmed.replacingOccurrences(of: " ", with: "-")
+            
+            // Re-apply the hashtag
+            return "#\(hyphenated)"
+        }
+        
+        // 4. Join back together with a single space
+        return formatted.joined(separator: " ")
+    }
+    
     @MainActor
     func generateSnapshot() -> Image {
         let exportView = QuoteSnapshotView(
@@ -267,7 +320,7 @@ struct QuoteEditorView: View {
     func deleteAction() {
         withAnimation {
             if isNewEntryMode {
-                tempText = ""; tempNote = ""; isFocused = false
+                tempText = ""; tempNote = ""; tempTags = ""; isFocused = false // Added tempTags reset
             } else {
                 if let q = quote {
                     modelContext.delete(q)
@@ -293,16 +346,25 @@ struct QuoteEditorView: View {
     func saveAction() {
         if isNewEntryMode {
             guard !tempText.isEmpty else { return }
-            let newQuote = Quote(text: tempText, note: tempNote, colorIndex: tempColorIndex)
+            
+            // Format tags before saving
+            let finalTags = formatTags(tempTags)
+            
+            let newQuote = Quote(text: tempText, note: tempNote, colorIndex: tempColorIndex, tags: finalTags)
             newQuote.dateCreated = tempDate
             modelContext.insert(newQuote)
             
             withAnimation { showSaveFeedback = true }
-            tempText = ""; tempNote = ""; isFocused = false
+            tempText = ""; tempNote = ""; tempTags = ""; isFocused = false // Reset tags here too
             tempDate = Date()
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { showSaveFeedback = false } }
         } else {
+            // Format tags for existing entries on save
+            if let q = quote {
+                q.tags = formatTags(q.tags)
+            }
+            
             withAnimation { showSaveFeedback = true }
             isFocused = false
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { withAnimation { showSaveFeedback = false } }
