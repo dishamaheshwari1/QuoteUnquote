@@ -21,7 +21,7 @@ struct QuoteEditorView: View {
     
     @State private var tempText: String = ""
     @State private var tempNote: String = ""
-    @State private var tempTags: String = "" // Added to hold new tags
+    @State private var tempTags: String = ""
     @State private var tempColorIndex: Int = 0
     @State private var tempDate: Date = Date()
     @State private var showDatePicker: Bool = false
@@ -44,7 +44,7 @@ struct QuoteEditorView: View {
     
     var currentText: String { isNewEntryMode ? tempText : quote!.text }
     var currentNote: String { isNewEntryMode ? tempNote : quote!.note }
-    var currentTags: String { isNewEntryMode ? tempTags : quote!.tags } // Computed property for tags
+    var currentTags: String { isNewEntryMode ? tempTags : quote!.tags }
     var activeColorIndex: Int { isNewEntryMode ? tempColorIndex : (quote?.colorIndex ?? 0) }
     var isLightBackground: Bool { return activeColorIndex == 0 || activeColorIndex == 3 }
     var textColor: Color { isLightBackground ? .black : .white }
@@ -82,15 +82,22 @@ struct QuoteEditorView: View {
                 // TAGS TEXTFIELD
                 TextField("", text: Binding(
                     get: { currentTags },
-                    set: { val in if isNewEntryMode { tempTags = val } else { quote!.tags = val } }
+                    set: { val in
+                        // Process the tags live as the user types
+                        let formatted = formatLiveTags(val)
+                        if isNewEntryMode { tempTags = formatted }
+                        else { quote!.tags = formatted }
+                    }
                 ), prompt: Text("add tags here").foregroundColor(textColor.opacity(0.35)))
                 .textFieldStyle(.plain)
                 .focusEffectDisabled()
                 .fontDesign(.serif)
-                .font(.system(size: 16, weight: .semibold))
+                // Touchup: Removed bold text and set weight to regular
+                .font(.system(size: 16, weight: .regular))
                 .multilineTextAlignment(.center)
-                .foregroundColor(textColor.opacity(0.8))
-                .tint(textColor)
+                // Touchup: Lighter color opacity
+                .foregroundColor(textColor.opacity(0.5))
+                // Touchup: Removed custom tint to restore system default highlight
                 .focused($isFocused)
                 .onKeyPress { keyPress in
                     if keyPress.key == .return && keyPress.modifiers.isEmpty {
@@ -110,12 +117,11 @@ struct QuoteEditorView: View {
                 .focusEffectDisabled()
                 .fontDesign(.serif)
                 .font(.system(size: dynamicQuoteFontSize, weight: .regular))
-                // THE TEXT JUMP FIXES:
                 .lineLimit(1...5)
                 .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor)
-                .tint(textColor)
+                // Touchup: Removed custom tint to restore system default highlight
                 .focused($isFocused)
                 .animation(.interactiveSpring, value: dynamicQuoteFontSize)
                 .onKeyPress { keyPress in
@@ -140,7 +146,7 @@ struct QuoteEditorView: View {
                 .font(.system(size: dynamicNoteFontSize, weight: .regular).italic())
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor.opacity(0.6))
-                .tint(textColor)
+                // Touchup: Removed custom tint to restore system default highlight
                 .focused($isFocused)
                 .animation(.interactiveSpring, value: dynamicNoteFontSize)
                 .onKeyPress { keyPress in
@@ -180,7 +186,6 @@ struct QuoteEditorView: View {
                 tempDate = existingDate
             }
         }
-        // TOP HELP BUTTON
         .overlay(alignment: .topTrailing) {
             NavigationLink(destination: OnboardingView()) {
                 Image(systemName: "questionmark")
@@ -196,7 +201,6 @@ struct QuoteEditorView: View {
             .padding(.trailing, 40)
             .padding(.top, 30)
         }
-        // BOTTOM TOOLBAR
         .overlay(alignment: .bottom) {
             HStack {
                 HStack(spacing: 22) {
@@ -234,7 +238,6 @@ struct QuoteEditorView: View {
                     .buttonStyle(.plain)
                     .focusable(false)
                     
-                    // FIXED GALLERY BUTTON: Calls the parent closure
                     Button(action: onGalleryClick) {
                         Image(systemName: "square.grid.2x2")
                     }
@@ -272,30 +275,32 @@ struct QuoteEditorView: View {
         }
     }
     
-    // MARK: - Tag Formatting Logic
-    func formatTags(_ input: String) -> String {
+    // MARK: - Live Tag Formatting Logic
+    func formatLiveTags(_ input: String) -> String {
         guard !input.isEmpty else { return "" }
         
-        // 1. Remove any commas
+        // Remove any commas
         let noCommas = input.replacingOccurrences(of: ",", with: "")
         
-        // 2. Split into an array using the hashtag as the separator
-        let rawTags = noCommas.split(separator: "#")
+        // Split by spaces, but keep the spaces intact in the layout so the user can keep typing
+        let words = noCommas.components(separatedBy: " ")
         
-        // 3. Process each tag
-        let formatted = rawTags.compactMap { tag -> String? in
-            let trimmed = tag.trimmingCharacters(in: .whitespaces)
-            guard !trimmed.isEmpty else { return nil }
+        let formattedWords = words.map { word -> String in
+            // If the user just typed a space, return an empty string to maintain the space gap
+            guard !word.isEmpty else { return "" }
             
-            // Replace internal spaces with hyphens
-            let hyphenated = trimmed.replacingOccurrences(of: " ", with: "-")
+            // Clean out any extra hashtags so we don't double up
+            let clean = word.replacingOccurrences(of: "#", with: "")
             
-            // Re-apply the hashtag
-            return "#\(hyphenated)"
+            // If they just typed a lone hashtag, let them keep typing
+            guard !clean.isEmpty else { return "#" }
+            
+            // Reapply a single hashtag to every word block
+            return "#\(clean)"
         }
         
-        // 4. Join back together with a single space
-        return formatted.joined(separator: " ")
+        // Join the array back together with standard spaces
+        return formattedWords.joined(separator: " ")
     }
     
     @MainActor
@@ -320,7 +325,7 @@ struct QuoteEditorView: View {
     func deleteAction() {
         withAnimation {
             if isNewEntryMode {
-                tempText = ""; tempNote = ""; tempTags = ""; isFocused = false // Added tempTags reset
+                tempText = ""; tempNote = ""; tempTags = ""; isFocused = false
             } else {
                 if let q = quote {
                     modelContext.delete(q)
@@ -347,24 +352,17 @@ struct QuoteEditorView: View {
         if isNewEntryMode {
             guard !tempText.isEmpty else { return }
             
-            // Format tags before saving
-            let finalTags = formatTags(tempTags)
-            
-            let newQuote = Quote(text: tempText, note: tempNote, colorIndex: tempColorIndex, tags: finalTags)
+            // Formatting is now handled automatically as the user types, so we just save the current state
+            let newQuote = Quote(text: tempText, note: tempNote, colorIndex: tempColorIndex, tags: tempTags)
             newQuote.dateCreated = tempDate
             modelContext.insert(newQuote)
             
             withAnimation { showSaveFeedback = true }
-            tempText = ""; tempNote = ""; tempTags = ""; isFocused = false // Reset tags here too
+            tempText = ""; tempNote = ""; tempTags = ""; isFocused = false
             tempDate = Date()
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { showSaveFeedback = false } }
         } else {
-            // Format tags for existing entries on save
-            if let q = quote {
-                q.tags = formatTags(q.tags)
-            }
-            
             withAnimation { showSaveFeedback = true }
             isFocused = false
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { withAnimation { showSaveFeedback = false } }
